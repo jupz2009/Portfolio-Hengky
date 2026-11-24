@@ -73,3 +73,4 @@ Lakukan berurutan, dan jangan hapus karya asli saat uji coba.
 - [x] Creative Journey, metadata SEO dasar, dan drag-and-drop upload.
 - [ ] Salin backend terbaru ke Apps Script, deploy ulang, lalu uji integrasi live.
 - [ ] Upload resumable untuk file besar dan penguatan anti-spam lanjutan.
+- [ ] Catatan: Pengujian deployment preview untuk branch redesign.
