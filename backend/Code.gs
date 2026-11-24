@@ -72,13 +72,13 @@ function saveProfile(token,data) {
   if (!verifyOwner_(token)) throw new Error('Akses ditolak. Silakan login kembali.');
   data=data||{};
   const old=getProfile_();
-  const profile={name:String(data.name||'').slice(0,100),intro:String(data.intro||'').slice(0,500),about:String(data.about||'').slice(0,1000),school:String(data.school||'').slice(0,150),contact:String(data.contact||'').slice(0,300),whatsapp:String(data.whatsapp||'').replace(/\\D/g,'').slice(0,20),instagram:String(data.instagram||'').replace(/^@/,'').replace(/^https?:\\/\\/(www\\.)?instagram\\.com\\//i,'').replace(/\\/.*$/,'').trim().slice(0,50),photo:old.photo||''};
+  const profile={name:String(data.name||'').slice(0,100),intro:String(data.intro||'').slice(0,500),about:String(data.about||'').slice(0,1000),school:String(data.school||'').slice(0,150),contact:String(data.contact||'').slice(0,300),whatsapp:String(data.whatsapp||'').replace(/\D/g,'').slice(0,20),instagram:String(data.instagram||'').replace(/^@/,'').replace(/^https?:\/\/(www\.)?instagram\.com\//i,'').replace(/\/.*$/,'').trim().slice(0,50),photo:old.photo||''};
   PropertiesService.getScriptProperties().setProperty(PROFILE_KEY,JSON.stringify(profile));
   return {success:true};
 }
 function saveProfilePhoto(token,dataUrl) {
   if (!verifyOwner_(token)) throw new Error('Akses ditolak.');
-  const m=String(dataUrl||'').match(/^data:(image\\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/);
+  const m=String(dataUrl||'').match(/^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/);
   if (!m) throw new Error('Foto harus JPG, PNG, atau WEBP yang valid.');
   const bytes=Utilities.base64Decode(m[2]);
   if (bytes.length>10*1024*1024) throw new Error('Foto hasil crop maksimal 10 MB.');
@@ -92,11 +92,11 @@ function uploadWork(token,title,description,dataUrl,fileName) {
   if (!verifyOwner_(token)) throw new Error('Akses ditolak. Silakan login kembali.');
   title=String(title||'').trim().slice(0,100); description=String(description||'').trim().slice(0,500);
   if (!title) throw new Error('Judul karya harus diisi.');
-  const m=String(dataUrl||'').match(/^data:(image\\/(?:jpeg|png|webp)|video\\/(?:mp4|webm|quicktime));base64,([A-Za-z0-9+/=]+)$/);
+  const m=String(dataUrl||'').match(/^data:(image\/(?:jpeg|png|webp)|video\/(?:mp4|webm|quicktime));base64,([A-Za-z0-9+/=]+)$/);
   if (!m) throw new Error('Gunakan file JPG, PNG, WEBP, MP4, WEBM, atau MOV.');
   const bytes=Utilities.base64Decode(m[2]);
   if (bytes.length>20*1024*1024) throw new Error('Upload melalui jalur ini maksimal 20 MB. Upload besar memerlukan modul Drive resumable.');
-  const safe=String(fileName||'karya').replace(/[^\\w.-]/g,'_').slice(0,100);
+  const safe=String(fileName||'karya').replace(/[^\w.-]/g,'_').slice(0,100);
   const file=getFolder_().createFile(Utilities.newBlob(bytes,m[1],safe));
   file.setSharing(DriveApp.Access.ANYONE_WITH_LINK,DriveApp.Permission.VIEW);
   const video=m[1].indexOf('video/')===0, type=video?'video':'image';
