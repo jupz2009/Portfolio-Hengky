@@ -15,22 +15,38 @@ Database Google Sheets dan folder Drive akan dibuat otomatis saat pertama kali A
 1. Klik Deploy → New deployment.
 2. Pilih Web app.
 3. Set Execute as menjadi akun pemilik script.
-4. Set akses sesuai kebutuhan API publik portfolio (umumnya Anyone). Endpoint dapat dipanggil publik; tindakan pemilik tetap memerlukan token login.
-5. Deploy, lalu salin URL Web App yang berakhiran /exec.
+4. Set akses menjadi Anyone agar website publik dapat memanggil API. Endpoint ini memang dapat dipanggil publik; operasi pemilik tetap memerlukan token login.
+5. Klik Deploy dan izinkan akses yang diminta Google.
+6. Salin URL Web App yang berakhiran `/exec`. Simpan URL ini, karena akan dipasang pada Cloudflare Worker.
+
+### Jika Apps Script sudah pernah di-deploy
+1. Buka Deploy → Manage deployments.
+2. Pilih deployment Web App yang sedang dipakai, lalu klik Edit.
+3. Pada Version, pilih New version.
+4. Klik Deploy. Biasanya URL `/exec` tetap sama untuk deployment yang diedit; gunakan URL yang ditampilkan di halaman deployment.
 
 ## 3. Sambungkan Cloudflare Worker
-Di pengaturan Worker hengky-portfolio-api, buat atau perbarui environment variable:
-- `GAS_URL` = URL Web App /exec dari langkah sebelumnya.
+1. Buka Cloudflare Dashboard → Workers & Pages → Worker `hengky-portfolio-api`.
+2. Buka Settings → Variables (atau Variables and Secrets).
+3. Tambahkan atau perbarui variable `GAS_URL` dengan URL Web App `/exec` dari langkah sebelumnya.
+4. Simpan perubahan dan lakukan Deploy bila diminta.
+5. Pastikan Worker meneruskan request POST ke `GAS_URL` dan mengembalikan respons JSON. Frontend sudah memakai alamat Worker `https://hengky-portfolio-api.fotografihengky.workers.dev`.
 
-Pastikan Worker meneruskan request POST ke GAS_URL dan mengembalikan respons JSON. Setelah mengganti versi Apps Script, deploy ulang versi Web App jika diminta.
+Jangan memasukkan password pemilik ke Cloudflare, GitHub, atau kode frontend. Password hanya disimpan di Script Properties Apps Script.
 
 ## 4. Tes setelah aktivasi
-- Buka website GitHub Pages dan pastikan profil serta karya termuat.
-- Login sebagai pemilik.
-- Kirim komentar percobaan dari jendela privat; komentar harus masuk antrean Menunggu.
-- Setujui komentar dari dashboard; komentar baru muncul di area publik.
-- Tolak komentar lain; komentar tersebut tidak tampil untuk pengunjung.
-- Uji edit profil, upload file kecil, dan hapus karya percobaan.
+Lakukan berurutan, dan jangan hapus karya asli saat uji coba.
+1. Buka website GitHub Pages; pastikan profil, karya, dan foto termuat.
+2. Buka dashboard pemilik dan login menggunakan password yang tersimpan pada Script Properties.
+3. Uji Edit Profil dengan perubahan kecil, lalu kembalikan jika perlu.
+4. Buat satu karya percobaan dengan file kecil; pastikan tampil di portfolio.
+5. Ubah judul/deskripsi karya percobaan; pastikan media tetap sama.
+6. Hapus hanya karya percobaan tersebut.
+7. Kirim komentar dari jendela privat; pastikan statusnya menunggu persetujuan. Setujui komentar uji dan pastikan muncul di publik.
+8. Kirim satu inquiry dari formulir; pastikan pesan terlihat di dashboard pemilik.
+9. Periksa angka visitor counter di footer dan dashboard.
+10. Tempel link PDF CV pada Edit Profil dan pastikan tombol Download CV muncul.
+11. Ganti tema, warna customizer, lalu muat ulang untuk memastikan preferensi tersimpan.
 
 ## Catatan batas dan privasi
 - Jalur upload yang ada saat ini masih memakai Base64 melalui Apps Script dan dibatasi 20 MB per file. Upload besar/resumable belum diaktifkan; jangan menganggap penyimpanan tanpa batas.
@@ -44,9 +60,10 @@ Pastikan Worker meneruskan request POST ke GAS_URL dan mengembalikan respons JSO
 - [x] Kode backend Apps Script terpisah dari frontend.
 - [x] Password pemilik dibaca dari Script Properties, bukan ditanam di source.
 - [x] Moderasi komentar: komentar baru Pending, pemilik dapat menyetujui/menolak.
-- [ ] Salin dan deploy Apps Script pada akun pemilik.
-- [ ] Isi GAS_URL di Cloudflare Worker.
-- [ ] Uji integrasi live di website.
+- [ ] Salin versi terbaru `backend/Code.gs` ke Apps Script.
+- [ ] Deploy versi terbaru Web App Apps Script.
+- [ ] Perbarui `GAS_URL` di Cloudflare Worker.
+- [ ] Jalankan seluruh pengujian integrasi live.
 - [ ] Upload resumable untuk file besar.
 - [x] Visitor counter persisten berbasis sesi browser.
 - [x] Formulir inquiry dan kotak pesan masuk khusus pemilik.
