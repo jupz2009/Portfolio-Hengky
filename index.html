@@ -630,7 +630,7 @@ async function logout(){
   }
 }
 
-async async function refreshPortfolio(){
+async function refreshPortfolio(){
   try{
     const data=await apiRequest('getPortfolioData',{ownerToken});
     currentProfile=data.profile||{};
