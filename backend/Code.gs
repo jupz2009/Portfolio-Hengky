@@ -28,6 +28,8 @@ function getDatabase_() {
   let comments = ss.getSheetByName('Comments');
   if (!comments) { comments = ss.insertSheet('Comments'); comments.appendRow(['ID','Name','Message','Date','Status']); }
   if (comments.getLastColumn() < 5) comments.getRange(1,5).setValue('Status');
+  let inquiries=ss.getSheetByName('Inquiries');
+  if (!inquiries) { inquiries=ss.insertSheet('Inquiries'); inquiries.appendRow(['ID','Name','Email','Message','Date','Status']); }
   return ss;
 }
 function getFolder_() {
@@ -41,7 +43,7 @@ function getFolder_() {
 function getProfile_() {
   const saved = PropertiesService.getScriptProperties().getProperty(PROFILE_KEY);
   if (saved) { try { return JSON.parse(saved); } catch (e) {} }
-  return {name:'Hengky Kurniawan',intro:'Pelajar Desain Komunikasi Visual yang tertarik pada fotografi, videografi, dan desain kreatif.',about:'Saya adalah siswa SMKS Asoka Singkawang jurusan Desain Komunikasi Visual. Saya memiliki minat dalam bidang fotografi, videografi, dan desain grafis.',school:'SMKS Asoka Singkawang · XI DKV',contact:'Punya pertanyaan atau ingin bekerja sama? Hubungi saya melalui WhatsApp atau Instagram.',whatsapp:'',instagram:'',photo:''};
+  return {name:'Hengky Kurniawan',intro:'Pelajar Desain Komunikasi Visual yang tertarik pada fotografi, videografi, dan desain kreatif.',about:'Saya adalah siswa SMKS Asoka Singkawang jurusan Desain Komunikasi Visual. Saya memiliki minat dalam bidang fotografi, videografi, dan desain grafis.',school:'SMKS Asoka Singkawang · XI DKV',contact:'Punya pertanyaan atau ingin bekerja sama? Hubungi saya melalui WhatsApp atau Instagram.',whatsapp:'',instagram:'',photo:'',cv:''};
 }
 function verifyOwner_(token) {
   return !!token && typeof token === 'string' &&
@@ -61,18 +63,20 @@ function logoutOwner(token) {
 }
 function getPortfolioData(token) {
   const ss = getDatabase_(), owner = verifyOwner_(token);
-  const ws = ss.getSheetByName('Works'), cs = ss.getSheetByName('Comments');
+  const ws = ss.getSheetByName('Works'), cs = ss.getSheetByName('Comments'), ins=ss.getSheetByName('Inquiries');
   const workRows = ws.getLastRow()>1 ? ws.getRange(2,1,ws.getLastRow()-1,7).getValues() : [];
   const commentRows = cs.getLastRow()>1 ? cs.getRange(2,1,cs.getLastRow()-1,5).getValues() : [];
   const works = workRows.reverse().map(r=>({id:String(r[0]),title:String(r[1]),description:String(r[2]),url:String(r[3]),fileId:String(r[4]),type:String(r[5]),date:r[6] instanceof Date?r[6].toISOString():String(r[6])}));
   const allComments = commentRows.reverse().map(r=>({id:String(r[0]),name:String(r[1]),message:String(r[2]),date:r[3] instanceof Date?r[3].toISOString():String(r[3]),status:String(r[4]||'Approved')}));
-  return {profile:getProfile_(),works:works,comments:allComments.filter(c=>c.status.toLowerCase()==='approved'),pendingComments:owner?allComments.filter(c=>c.status.toLowerCase()==='pending'):[],isOwner:owner};
+  const inquiryRows=owner&&ins.getLastRow()>1?ins.getRange(2,1,ins.getLastRow()-1,6).getValues():[];
+  const inquiries=inquiryRows.reverse().map(r=>({id:String(r[0]),name:String(r[1]),email:String(r[2]),message:String(r[3]),date:r[4] instanceof Date?r[4].toISOString():String(r[4]),status:String(r[5]||'New')}));
+  return {profile:getProfile_(),works:works,comments:allComments.filter(c=>c.status.toLowerCase()==='approved'),pendingComments:owner?allComments.filter(c=>c.status.toLowerCase()==='pending'):[],inquiries:inquiries,isOwner:owner};
 }
 function saveProfile(token,data) {
   if (!verifyOwner_(token)) throw new Error('Akses ditolak. Silakan login kembali.');
   data=data||{};
   const old=getProfile_();
-  const profile={name:String(data.name||'').slice(0,100),intro:String(data.intro||'').slice(0,500),about:String(data.about||'').slice(0,1000),school:String(data.school||'').slice(0,150),contact:String(data.contact||'').slice(0,300),whatsapp:String(data.whatsapp||'').replace(/\D/g,'').slice(0,20),instagram:String(data.instagram||'').replace(/^@/,'').replace(/^https?:\/\/(www\.)?instagram\.com\//i,'').replace(/\/.*$/,'').trim().slice(0,50),photo:old.photo||''};
+  const profile={name:String(data.name||'').slice(0,100),intro:String(data.intro||'').slice(0,500),about:String(data.about||'').slice(0,1000),school:String(data.school||'').slice(0,150),contact:String(data.contact||'').slice(0,300),whatsapp:String(data.whatsapp||'').replace(/\D/g,'').slice(0,20),instagram:String(data.instagram||'').replace(/^@/,'').replace(/^https?:\/\/(www\.)?instagram\.com\//i,'').replace(/\/.*$/,'').trim().slice(0,50),photo:old.photo||'',cv:String(data.cv||old.cv||'').trim().slice(0,500)};
   PropertiesService.getScriptProperties().setProperty(PROFILE_KEY,JSON.stringify(profile));
   return {success:true};
 }
@@ -139,6 +143,20 @@ function addComment(name,message) {
   getDatabase_().getSheetByName('Comments').appendRow([Utilities.getUuid(),name,message,new Date(),'Pending']);
   return {success:true,pending:true,message:'Komentar dikirim dan menunggu persetujuan pemilik.'};
 }
+function addInquiry(name,email,message) {
+  name=String(name||'').trim().replace(/[<>]/g,'').slice(0,80);
+  email=String(email||'').trim().slice(0,120);
+  message=String(message||'').trim().replace(/[<>]/g,'').slice(0,1200);
+  if (!name||!message) throw new Error('Nama dan pesan wajib diisi.');
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('Format email belum benar.');
+  if (message.length<10) throw new Error('Pesan minimal 10 karakter.');
+  const cache=CacheService.getScriptCache();
+  const key='HK_INQUIRY_'+Utilities.base64EncodeWebSafe((email||name).toLowerCase()).slice(0,45);
+  if(cache.get(key)) throw new Error('Pesan baru saja dikirim. Coba lagi beberapa menit.');
+  cache.put(key,'1',300);
+  getDatabase_().getSheetByName('Inquiries').appendRow([Utilities.getUuid(),name,email,message,new Date(),'New']);
+  return {success:true,message:'Pesan berhasil dikirim.'};
+}
 function moderateComment(token,id,status) {
   if (!verifyOwner_(token)) throw new Error('Akses ditolak.');
   status=String(status||'').toLowerCase();
@@ -186,6 +204,7 @@ function doPost(e) {
       case 'updateWork': data=updateWork(p.ownerToken,p.id,p.title,p.description); break;
       case 'deleteWork': data=deleteWork(p.ownerToken,p.id); break;
       case 'addComment': data=addComment(p.name,p.message); break;
+      case 'addInquiry': data=addInquiry(p.name,p.email,p.message); break;
       case 'moderateComment': data=moderateComment(p.ownerToken,p.id,p.status); break;
       default: throw new Error('Perintah API tidak dikenal.');
     }
