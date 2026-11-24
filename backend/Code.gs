@@ -104,6 +104,19 @@ function uploadWork(token,title,description,dataUrl,fileName) {
   getDatabase_().getSheetByName('Works').appendRow([Utilities.getUuid(),title,description,url,file.getId(),type,new Date()]);
   return {success:true};
 }
+function updateWork(token,id,title,description) {
+  if (!verifyOwner_(token)) throw new Error('Akses ditolak.');
+  title=String(title||'').trim().slice(0,100);
+  description=String(description||'').trim().slice(0,500);
+  if (!title) throw new Error('Judul karya harus diisi.');
+  const sh=getDatabase_().getSheetByName('Works');
+  const rows=sh.getLastRow()>1?sh.getRange(2,1,sh.getLastRow()-1,7).getValues():[];
+  for (let i=0;i<rows.length;i++) if (String(rows[i][0])===String(id)) {
+    sh.getRange(i+2,2,1,2).setValues([[title,description]]);
+    return {success:true};
+  }
+  throw new Error('Karya tidak ditemukan.');
+}
 function deleteWork(token,id) {
   if (!verifyOwner_(token)) throw new Error('Akses ditolak.');
   const sh=getDatabase_().getSheetByName('Works');
@@ -163,12 +176,14 @@ function doPost(e) {
     const req=JSON.parse(e.postData.contents||'{}'), p=req.payload||{};
     let data;
     switch(req.action) {
-      case 'trackVisit': data=trackVisit(p.sessionId); break;\n      case 'loginOwner': data=loginOwner(p.password); break;
+      case 'trackVisit': data=trackVisit(p.sessionId); break;
+      case 'loginOwner': data=loginOwner(p.password); break;
       case 'logoutOwner': data=logoutOwner(p.ownerToken); break;
       case 'getPortfolioData': data=getPortfolioData(p.ownerToken); break;
       case 'saveProfile': data=saveProfile(p.ownerToken,p.data); break;
       case 'saveProfilePhoto': data=saveProfilePhoto(p.ownerToken,p.croppedData); break;
       case 'uploadWork': data=uploadWork(p.ownerToken,p.title,p.description,p.dataUrl,p.fileName); break;
+      case 'updateWork': data=updateWork(p.ownerToken,p.id,p.title,p.description); break;
       case 'deleteWork': data=deleteWork(p.ownerToken,p.id); break;
       case 'addComment': data=addComment(p.name,p.message); break;
       case 'moderateComment': data=moderateComment(p.ownerToken,p.id,p.status); break;
