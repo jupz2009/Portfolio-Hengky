@@ -76,7 +76,7 @@ function saveProfile(token,data) {
   if (!verifyOwner_(token)) throw new Error('Akses ditolak. Silakan login kembali.');
   data=data||{};
   const old=getProfile_();
-  const profile={name:String(data.name||'').slice(0,100),intro:String(data.intro||'').slice(0,500),about:String(data.about||'').slice(0,1000),school:String(data.school||'').slice(0,150),contact:String(data.contact||'').slice(0,300),whatsapp:String(data.whatsapp||'').replace(/\D/g,'').slice(0,20),instagram:String(data.instagram||'').replace(/^@/,'').replace(/^https?:\/\/(www\.)?instagram\.com\//i,'').replace(/\/.*$/,'').trim().slice(0,50),photo:old.photo||'',cv:String(data.cv||old.cv||'').trim().slice(0,500)};
+  const profile={name:String(data.name||'').slice(0,100),intro:String(data.intro||'').slice(0,500),about:String(data.about||'').slice(0,1000),school:String(data.school||'').slice(0,150),contact:String(data.contact||'').slice(0,300),whatsapp:String(data.whatsapp||'').replace(/\D/g,'').slice(0,20),instagram:String(data.instagram||'').replace(/^@/,'').replace(/^https?:\/\/(www\.)?instagram\.com\//i,'').replace(/\/.*$/,'').trim().slice(0,50),photo:old.photo||'',cv:String(data.cv!==undefined?data.cv:(old.cv||'')).trim().slice(0,500)};
   PropertiesService.getScriptProperties().setProperty(PROFILE_KEY,JSON.stringify(profile));
   return {success:true};
 }
