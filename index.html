@@ -3,6 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Portfolio Hengky Kurniawan — fotografi, videografi, dan desain komunikasi visual.">
+<meta name="theme-color" content="#f3f0e9">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Hengky Kurniawan | Creative Portfolio">
+<meta property="og:description" content="Kumpulan karya fotografi, videografi, dan desain kreatif.">
+<meta property="og:url" content="https://jupz2009.github.io/Portfolio-Hengky/">
 <title>Hengky Kurniawan | Portfolio</title>
 
 <style>
@@ -321,6 +327,7 @@ body[data-theme=dark] .btn-secondary{color:var(--text);border-color:var(--border
     <a href="#home">Home</a>
     <a href="#about">About</a>
     <a href="#portfolio">Portfolio</a>
+    <a href="#journey">Journey</a>
     <a href="#contact">Contact</a>
     <button class="theme-toggle" id="themeToggle" type="button" aria-label="Ganti tema">◐</button><button class="owner-icon" onclick="openOwnerLogin()" title="Login pemilik">♙</button>
   </nav>
@@ -332,13 +339,15 @@ body[data-theme=dark] .btn-secondary{color:var(--text);border-color:var(--border
     <div class="admin-stat"><span>Total karya</span><strong id="adminWorkCount">0</strong></div>
     <div class="admin-stat"><span>Foto / desain</span><strong id="adminImageCount">0</strong></div>
     <div class="admin-stat"><span>Video</span><strong id="adminVideoCount">0</strong></div>
-    <div class="admin-stat"><span>Komentar</span><strong id="adminCommentCount">0</strong></div>\n    <div class="admin-stat"><span>Total kunjungan</span><strong id="adminVisitorCount">0</strong></div>
+    <div class="admin-stat"><span>Komentar</span><strong id="adminCommentCount">0</strong></div>
+    <div class="admin-stat"><span>Pesan masuk</span><strong id="adminInquiryCount">0</strong></div>\n    <div class="admin-stat"><span>Total kunjungan</span><strong id="adminVisitorCount">0</strong></div>
   </div>
   <div class="owner-actions">
     <button onclick="openProfileModal()">Edit Profil</button>
     <button onclick="openUploadModal()">Upload Karya</button>
     <button onclick="logout()">Logout</button>
   </div>
+  <div class="moderation-panel"><div class="admin-head"><div><h3>Pesan Masuk</h3><p class="admin-subtitle">Pertanyaan dari formulir website.</p></div></div><div id="inquiryInbox" class="pending-list"><p class="admin-subtitle">Memuat pesan...</p></div></div>
   <div class="moderation-panel">
     <div class="admin-head"><div><h3>Moderasi Komentar</h3><p class="admin-subtitle">Komentar baru tampil setelah disetujui.</p></div><span class="admin-status" id="pendingCount">0 menunggu</span></div>
     <div id="pendingComments" class="pending-list"><p class="admin-subtitle">Memuat antrean komentar...</p></div>
@@ -354,6 +363,7 @@ body[data-theme=dark] .btn-secondary{color:var(--text);border-color:var(--border
     <div class="hero-buttons">
       <a class="btn btn-primary" href="#portfolio">Lihat Karya ↗</a>
       <a class="btn btn-secondary" href="#contact">Hubungi Saya</a>
+      <a class="btn btn-secondary" id="cvDownload" href="#" target="_blank" rel="noopener noreferrer" style="display:none">Download CV ↓</a>
     </div>
   </div>
   <div class="profile-frame">
@@ -369,6 +379,8 @@ body[data-theme=dark] .btn-secondary{color:var(--text);border-color:var(--border
     <div class="school-label" id="schoolText"></div>
   </div>
 </section>
+
+<section id="journey"><div class="tag">02 / CREATIVE JOURNEY</div><h2 class="section-heading">Perjalanan Kreatif<span class="gradient">.</span></h2><p class="section-description">Proses belajar dan berkembang di bidang desain, fotografi, dan videografi.</p><div class="about-card journey-list"><p><strong>SMKS Asoka Singkawang</strong> — Belajar Desain Komunikasi Visual dan mengembangkan dasar desain digital.</p><p><strong>Pengalaman Magang</strong> — Mengenal alur kerja studio, fotografi, dan produksi konten visual.</p><p><strong>Eksplorasi Karya</strong> — Terus mengembangkan kemampuan melalui proyek desain, foto, dan video.</p></div></section>
 
 <section id="portfolio">
   <div class="tag">02 / MY WORKS</div>
@@ -388,6 +400,8 @@ body[data-theme=dark] .btn-secondary{color:var(--text);border-color:var(--border
     <div class="contact-empty" id="contactEmpty">Hubungi saya melalui media sosial.</div>
   </div>
 </section>
+
+<section id="inquiry"><div class="tag">04 / PROJECT INQUIRY</div><h2 class="section-heading">Kirim Pertanyaan<span class="gradient">.</span></h2><p class="section-description">Punya ide proyek atau ingin bertanya? Kirim pesan melalui formulir ini.</p><div class="comment-form inquiry-form"><div class="field"><label>Nama</label><input id="inquiryName" maxlength="80" placeholder="Nama kamu"></div><div class="field"><label>Email (opsional)</label><input id="inquiryEmail" type="email" maxlength="120" placeholder="email@contoh.com"></div><div class="field"><label>Pesan</label><textarea id="inquiryMessage" maxlength="1200" placeholder="Ceritakan kebutuhan atau ide proyek kamu..."></textarea></div><button class="btn btn-primary" onclick="submitInquiry()">Kirim Pesan</button><div class="modal-status" id="inquiryStatus"></div></div></section>
 
 <section id="comments">
   <div class="tag">04 / YOUR THOUGHTS</div>
@@ -452,6 +466,7 @@ body[data-theme=dark] .btn-secondary{color:var(--text);border-color:var(--border
       <input id="instagramInput" placeholder="Contoh: hengky.kurniawan">
       <p class="hint">Masukkan username saja, tanpa tanda @.</p>
     </div>
+    <div class="field"><label>Link CV (Google Drive / PDF)</label><input id="cvInput" type="url" placeholder="https://..."><p class="hint">Tempel tautan PDF CV yang dapat dilihat publik.</p></div>
     <div class="field">
       <label>Ganti foto profil</label>
       <input id="profilePhotoInput" type="file" accept="image/*">
@@ -623,6 +638,8 @@ async async function refreshPortfolio(){
     $('contactInput').value=currentProfile.contact||'';
     $('whatsappInput').value=currentProfile.whatsapp||'';
     $('instagramInput').value=currentProfile.instagram||'';
+    $('cvInput').value=currentProfile.cv||'';
+    const cvLink=$('cvDownload'); if(currentProfile.cv){cvLink.href=currentProfile.cv;cvLink.style.display='inline-flex'}else{cvLink.style.display='none'}
 
     renderContact(currentProfile);
     renderWorks(data.works||[],data.isOwner);
@@ -630,6 +647,8 @@ async async function refreshPortfolio(){
     $('adminImageCount').textContent=(data.works||[]).filter(w=>w.type!=='video').length;
     $('adminVideoCount').textContent=(data.works||[]).filter(w=>w.type==='video').length;
     $('adminCommentCount').textContent=(data.comments||[]).length;
+    $('adminInquiryCount').textContent=(data.inquiries||[]).length;
+    renderInquiries(data.inquiries||[],data.isOwner);
     renderComments(data.comments||[]);
     renderPendingComments(data.pendingComments||[],data.isOwner);
   }catch(error){
@@ -821,7 +840,8 @@ async function saveProfile(){
     school:$('schoolInput').value,
     contact:$('contactInput').value,
     whatsapp:$('whatsappInput').value,
-    instagram:$('instagramInput').value
+    instagram:$('instagramInput').value,
+    cv:$('cvInput').value
   };
 
   button.disabled=true;
@@ -970,6 +990,17 @@ function renderContact(profile){
   empty.style.display=hasContact?'none':'block';
 }
 
+async function submitInquiry(){
+ const name=$('inquiryName').value.trim(),email=$('inquiryEmail').value.trim(),message=$('inquiryMessage').value.trim();
+ $('inquiryStatus').textContent='Mengirim pesan...';
+ try{await apiRequest('addInquiry',{name,email,message});$('inquiryName').value='';$('inquiryEmail').value='';$('inquiryMessage').value='';$('inquiryStatus').textContent='Pesan berhasil dikirim. Terima kasih!';}
+ catch(error){$('inquiryStatus').textContent=error.message;}
+}
+function renderInquiries(items,isOwner){
+ const list=$('inquiryInbox');if(!list)return;list.replaceChildren();if(!isOwner)return;
+ if(!items.length){const empty=document.createElement('p');empty.className='moderation-empty';empty.textContent='Belum ada pesan masuk.';list.appendChild(empty);return;}
+ items.forEach(item=>{const card=document.createElement('article');card.className='pending-item';const body=document.createElement('div');const name=document.createElement('strong');name.textContent=item.name+(item.email?' · '+item.email:'');const message=document.createElement('p');message.textContent=item.message;const date=document.createElement('small');date.textContent=formatDate(item.date);body.append(name,message,date);card.appendChild(body);list.appendChild(card);});
+}
 function submitComment(){
   const name=$('commentName').value.trim();
   const message=$('commentMessage').value.trim();
