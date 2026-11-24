@@ -309,6 +309,7 @@ body[data-theme=dark] .btn-secondary{color:var(--text);border-color:var(--border
 @media(max-width:750px){.hero{grid-template-columns:1fr;padding:70px 0}.profile-frame{grid-row:1;width:220px}.works-grid{grid-template-columns:repeat(2,minmax(0,1fr))}section{padding:65px 0}}
 @media(max-width:480px){.works-grid{grid-template-columns:1fr}.work-media,.work-video{height:250px}nav{gap:8px}.logo{font-size:11px}.hero{min-height:auto}.profile-frame{width:190px}}
 
+.moderation-panel{margin-top:22px;padding-top:20px;border-top:1px solid var(--border)}.pending-list{display:grid;gap:10px;margin-top:12px}.pending-item{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;padding:14px;background:var(--bg);border:1px solid var(--border)}.pending-item p{font-size:13px;color:var(--muted);white-space:pre-wrap;margin-top:4px}.pending-item small{font-size:10px;color:var(--muted)}.moderation-actions{display:flex;gap:7px;flex-shrink:0}.moderation-actions button{padding:7px 10px;border:1px solid var(--border);background:transparent;color:var(--text);font-size:11px}.moderation-actions .approve{background:var(--text);color:var(--bg)}.moderation-empty{font-size:12px;color:var(--muted);padding:12px 0}@media(max-width:600px){.pending-item{display:block}.moderation-actions{margin-top:10px}}
 </style>
 </head>
 
@@ -337,6 +338,10 @@ body[data-theme=dark] .btn-secondary{color:var(--text);border-color:var(--border
     <button onclick="openProfileModal()">Edit Profil</button>
     <button onclick="openUploadModal()">Upload Karya</button>
     <button onclick="logout()">Logout</button>
+  </div>
+  <div class="moderation-panel">
+    <div class="admin-head"><div><h3>Moderasi Komentar</h3><p class="admin-subtitle">Komentar baru tampil setelah disetujui.</p></div><span class="admin-status" id="pendingCount">0 menunggu</span></div>
+    <div id="pendingComments" class="pending-list"><p class="admin-subtitle">Memuat antrean komentar...</p></div>
   </div>
 </div>
 
@@ -626,6 +631,7 @@ async function refreshPortfolio(){
     $('adminVideoCount').textContent=(data.works||[]).filter(w=>w.type==='video').length;
     $('adminCommentCount').textContent=(data.comments||[]).length;
     renderComments(data.comments||[]);
+    renderPendingComments(data.pendingComments||[],data.isOwner);
   }catch(error){
     $('worksGrid').innerHTML=
       '<div class="empty-state">Gagal memuat data: '+escapeHTML(error.message)+'</div>';
@@ -956,10 +962,41 @@ function submitComment(){
     .then(()=>{
       $('commentName').value='';
       $('commentMessage').value='';
-      $('commentStatus').textContent='Komentar berhasil dikirim.';
+      $('commentStatus').textContent='Komentar terkirim dan menunggu persetujuan pemilik.';
       refreshPortfolio();
     })
     .catch(error=>$('commentStatus').textContent=error.message);
+}
+
+async function moderateComment(id,status){
+  try{
+    await apiRequest('moderateComment',{ownerToken,id,status});
+    await refreshPortfolio();
+  }catch(error){alert(error.message||'Moderasi gagal.')}
+}
+function renderPendingComments(comments,isOwner){
+  const list=$('pendingComments');
+  const count=$('pendingCount');
+  if(!list||!count)return;
+  count.textContent=comments.length+' menunggu';
+  list.replaceChildren();
+  if(!isOwner)return;
+  if(!comments.length){
+    const empty=document.createElement('p');empty.className='moderation-empty';empty.textContent='Tidak ada komentar yang menunggu persetujuan.';
+    list.appendChild(empty);return;
+  }
+  comments.forEach(comment=>{
+    const item=document.createElement('article');item.className='pending-item';
+    const body=document.createElement('div');
+    const name=document.createElement('strong');name.textContent=comment.name;
+    const message=document.createElement('p');message.textContent=comment.message;
+    const date=document.createElement('small');date.textContent=formatDate(comment.date);
+    body.append(name,message,date);
+    const actions=document.createElement('div');actions.className='moderation-actions';
+    const approve=document.createElement('button');approve.className='approve';approve.textContent='Setujui';approve.onclick=()=>moderateComment(comment.id,'approved');
+    const reject=document.createElement('button');reject.textContent='Tolak';reject.onclick=()=>moderateComment(comment.id,'rejected');
+    actions.append(approve,reject);item.append(body,actions);list.appendChild(item);
+  });
 }
 
 function renderComments(comments){
