@@ -138,12 +138,32 @@ function moderateComment(token,id,status) {
   }
   throw new Error('Komentar tidak ditemukan.');
 }
+function trackVisit(sessionId) {
+  sessionId=String(sessionId||'').replace(/[^a-zA-Z0-9_-]/g,'').slice(0,80);
+  if (sessionId.length<12) throw new Error('ID sesi kunjungan tidak valid.');
+  const cache=CacheService.getScriptCache();
+  const key='HK_VISIT_'+sessionId;
+  if (cache.get(key)) {
+    return {success:true,count:Number(PropertiesService.getScriptProperties().getProperty('HK_VISIT_COUNT')||0)};
+  }
+  const lock=LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    const props=PropertiesService.getScriptProperties();
+    const count=Number(props.getProperty('HK_VISIT_COUNT')||0)+1;
+    props.setProperty('HK_VISIT_COUNT',String(count));
+    cache.put(key,'1',21600);
+    return {success:true,count:count};
+  } finally {
+    lock.releaseLock();
+  }
+}
 function doPost(e) {
   try {
     const req=JSON.parse(e.postData.contents||'{}'), p=req.payload||{};
     let data;
     switch(req.action) {
-      case 'loginOwner': data=loginOwner(p.password); break;
+      case 'trackVisit': data=trackVisit(p.sessionId); break;\n      case 'loginOwner': data=loginOwner(p.password); break;
       case 'logoutOwner': data=logoutOwner(p.ownerToken); break;
       case 'getPortfolioData': data=getPortfolioData(p.ownerToken); break;
       case 'saveProfile': data=saveProfile(p.ownerToken,p.data); break;
