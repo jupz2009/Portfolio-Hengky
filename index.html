@@ -316,10 +316,14 @@ body[data-theme=dark] .btn-secondary{color:var(--text);border-color:var(--border
 @media(max-width:480px){.works-grid{grid-template-columns:1fr}.work-media,.work-video{height:250px}nav{gap:8px}.logo{font-size:11px}.hero{min-height:auto}.profile-frame{width:190px}}
 
 .moderation-panel{margin-top:22px;padding-top:20px;border-top:1px solid var(--border)}.pending-list{display:grid;gap:10px;margin-top:12px}.pending-item{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;padding:14px;background:var(--bg);border:1px solid var(--border)}.pending-item p{font-size:13px;color:var(--muted);white-space:pre-wrap;margin-top:4px}.pending-item small{font-size:10px;color:var(--muted)}.moderation-actions{display:flex;gap:7px;flex-shrink:0}.moderation-actions button{padding:7px 10px;border:1px solid var(--border);background:transparent;color:var(--text);font-size:11px}.moderation-actions .approve{background:var(--text);color:var(--bg)}.moderation-empty{font-size:12px;color:var(--muted);padding:12px 0}@media(max-width:600px){.pending-item{display:block}.moderation-actions{margin-top:10px}}
+
+.custom-cursor{position:fixed;left:0;top:0;width:12px;height:12px;border:1px solid var(--cyan);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);opacity:0;transition:width .15s,height .15s,opacity .2s;mix-blend-mode:difference}@media(pointer:fine){body{cursor:none}a,button,input,textarea{cursor:none}.custom-cursor{opacity:1}.custom-cursor.is-hover{width:28px;height:28px;background:#a33e2f22}}@media(pointer:coarse){.custom-cursor{display:none}}
+.accent-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:14px}.accent-tools span{font-size:11px;color:var(--muted);margin-right:5px}.accent-tools button{width:25px;height:25px;border-radius:50%;border:2px solid var(--border);font-size:0}.accent-tools button[aria-pressed=true]{outline:2px solid var(--cyan);outline-offset:3px}
 </style>
 </head>
 
 <body class="portfolio-page-reveal">
+<div class="custom-cursor" id="customCursor" aria-hidden="true"></div>
 <div class="container">
 <header>
   <div class="logo">HENGKY KURNIAWAN<span>.</span></div>
@@ -343,6 +347,7 @@ body[data-theme=dark] .btn-secondary{color:var(--text);border-color:var(--border
     <div class="admin-stat"><span>Komentar</span><strong id="adminCommentCount">0</strong></div>
     <div class="admin-stat"><span>Pesan masuk</span><strong id="adminInquiryCount">0</strong></div>\n    <div class="admin-stat"><span>Total kunjungan</span><strong id="adminVisitorCount">0</strong></div>
   </div>
+  <div class="accent-tools"><span>Customizer warna:</span><button type="button" data-accent="terracotta" aria-label="Terracotta" title="Terracotta" style="background:#a33e2f"></button><button type="button" data-accent="forest" aria-label="Forest" title="Forest" style="background:#52745d"></button><button type="button" data-accent="blue" aria-label="Blue" title="Blue" style="background:#537c91"></button></div>
   <div class="owner-actions">
     <button onclick="openProfileModal()">Edit Profil</button>
     <button onclick="openUploadModal()">Upload Karya</button>
@@ -563,6 +568,12 @@ $('themeToggle').addEventListener('click',()=>{
   $('themeToggle').textContent = next === 'dark' ? '☀' : '◐';
   localStorage.setItem('hk_portfolio_theme',next);
 });
+const accentPalettes={terracotta:['#a33e2f','#c18a4b'],forest:['#52745d','#b08a56'],blue:['#537c91','#9b83a8']};
+function applyAccent(name){const palette=accentPalettes[name]||accentPalettes.terracotta;document.body.style.setProperty('--cyan',palette[0]);document.body.style.setProperty('--purple',palette[1]);localStorage.setItem('hk_portfolio_accent',name);document.querySelectorAll('[data-accent]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.accent===name)));}
+document.querySelectorAll('[data-accent]').forEach(button=>button.addEventListener('click',()=>applyAccent(button.dataset.accent)));
+applyAccent(localStorage.getItem('hk_portfolio_accent')||'terracotta');
+const cursor=$('customCursor');
+if(window.matchMedia&&window.matchMedia('(pointer:fine)').matches){document.addEventListener('pointermove',event=>{cursor.style.left=event.clientX+'px';cursor.style.top=event.clientY+'px'});document.querySelectorAll('a,button').forEach(el=>{el.addEventListener('pointerenter',()=>cursor.classList.add('is-hover'));el.addEventListener('pointerleave',()=>cursor.classList.remove('is-hover'));});}
 $('workSearch').addEventListener('input',event=>{activeSearch=event.target.value.trim().toLowerCase();renderWorks(allWorks,!!ownerToken)});
 $('caseModal').addEventListener('click',event=>{if(event.target===$('caseModal'))closeCase()});
 $('workFilters').addEventListener('click',event=>{
