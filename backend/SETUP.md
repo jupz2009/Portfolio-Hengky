@@ -6,7 +6,7 @@ Frontend berada di GitHub Pages (`index.html`). File backend yang dipakai adalah
 1. Buka https://script.google.com/ dan buat project baru.
 2. Salin seluruh isi `backend/Code.gs` ke file `Code.gs` pada project Apps Script.
 3. Buka Project Settings → Script Properties.
-4. Tambahkan properti `OWNER_PASSWORD` dan isi dengan password baru yang kuat. Jangan masukkan password ke GitHub atau file kode.
+4. Pastikan properti `OWNER_PASSWORD` sudah tersedia. Pertahankan nilai yang saat ini kamu gunakan; jangan menuliskan password ke GitHub atau file kode.
 5. Simpan project.
 
 Database Google Sheets dan folder Drive akan dibuat otomatis saat pertama kali API dipanggil. Akun Google yang menjalankan Apps Script akan menjadi pemilik file-file tersebut.
@@ -48,4 +48,11 @@ Pastikan Worker meneruskan request POST ke GAS_URL dan mengembalikan respons JSO
 - [ ] Isi GAS_URL di Cloudflare Worker.
 - [ ] Uji integrasi live di website.
 - [ ] Upload resumable untuk file besar.
-- [ ] Visitor counter persisten, formulir inquiry, testimonial, CV, dan fitur admin lanjutan.
+- [x] Visitor counter persisten berbasis sesi browser.
+- [x] Formulir inquiry dan kotak pesan masuk khusus pemilik.
+- [x] Ulasan/testimonial dengan moderasi persetujuan.
+- [x] Tautan Download CV yang diatur dari Edit Profil.
+- [x] Pengeditan judul dan deskripsi karya tanpa unggah ulang media.
+- [x] Creative Journey, metadata SEO dasar, dan drag-and-drop upload.
+- [ ] Salin backend terbaru ke Apps Script, deploy ulang, lalu uji integrasi live.
+- [ ] Upload resumable untuk file besar dan penguatan anti-spam lanjutan.
